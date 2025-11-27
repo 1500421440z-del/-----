@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网文风向标 · 每日实时榜</title>
+    <style>
+        :root { --qidian: #bf2c24; --tomato: #ff6b00; --bg: #f4f5f7; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { margin: 0; font-size: 2rem; color: #222; }
+        .date { color: #666; font-size: 0.9rem; margin-top: 5px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .col-header { padding-bottom: 10px; border-bottom: 3px solid #ddd; margin-bottom: 20px; font-weight: bold; font-size: 1.2rem; }
+        .qidian-h { border-color: var(--qidian); color: var(--qidian); }
+        .tomato-h { border-color: var(--tomato); color: var(--tomato); }
+        
+        .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
+        .rank { position: absolute; right: 15px; top: 10px; font-size: 2rem; font-weight: 900; opacity: 0.08; }
+        .book-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 5px; }
+        .author { font-size: 0.85rem; color: #888; margin-bottom: 10px; }
+        .tag { background: #eee; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; color: #555; }
+        .factor { background: #fffcf0; padding: 10px; border-radius: 6px; font-size: 0.9rem; color: #b76e00; margin-top: 10px; line-height: 1.4; }
+        .highlights { margin: 10px 0 0; padding-left: 20px; font-size: 0.9rem; color: #555; }
+        .highlights li { margin-bottom: 4px; }
+        
+        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔥 2025 网文新锐风向标</h1>
+            <div class="date" id="dateDisplay">加载中...</div>
+        </header>
+        <div class="grid">
+            <div>
+                <div class="col-header qidian-h">起点中文网 · 硬核新锐</div>
+                <div id="qidian-list"></div>
+            </div>
+            <div>
+                <div class="col-header tomato-h">番茄小说 · 流量脑洞</div>
+                <div id="tomato-list"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        fetch('data.json?t=' + new Date().getTime())
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('dateDisplay').textContent = "更新时间: " + data.timestamp;
+                const renderCard = (book) => `
+                    <div class="card">
+                        <div class="rank">${book.rank}</div>
+                        <div class="book-title">${book.title}</div>
+                        <div class="author">${book.author} ${book.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+                        <div class="factor"><strong>🔥 爆火：</strong>${book.factor}</div>
+                        <ul class="highlights">${book.highlights.map(h=>`<li>${h}</li>`).join('')}</ul>
+                    </div>
+                `;
+                
+                data.books.forEach(book => {
+                    const html = renderCard(book);
+                    if(book.platform === 'qidian') document.getElementById('qidian-list').innerHTML += html;
+                    else document.getElementById('tomato-list').innerHTML += html;
+                });
+            })
+            .catch(e => {
+                document.getElementById('dateDisplay').innerHTML = "暂无数据，请等待第一次自动更新完成（约5分钟）。";
+            });
+    </script>
+</body>
+</html>
